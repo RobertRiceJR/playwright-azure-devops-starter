@@ -1,0 +1,28 @@
+trigger:
+- main
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+- checkout: self
+- task: NodeTool@0
+  inputs:
+    versionSpec: '20.x'
+- script: |
+    npm ci
+    npx playwright install --with-deps
+    npx playwright test
+  displayName: Run Playwright
+
+# Publish JUnit XML to the Tests tab
+- task: PublishTestResults@2
+  inputs:
+    testResultsFormat: 'JUnit'
+    testResultsFiles: 'test-results/junit.xml'
+    testRunTitle: 'Playwright UI/API'
+    failTaskOnFailedTests: true
+
+- publish: playwright-report
+  artifact: playwright-report
+  displayName: Publish Playwright HTML report
